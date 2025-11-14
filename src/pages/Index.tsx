@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
@@ -16,9 +16,25 @@ export interface Episode {
   consumed: boolean;
 }
 
+const STORAGE_KEY = 'transformation_episodes';
+
 const Index = () => {
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [episodes, setEpisodes] = useState<Episode[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
   const [activeTab, setActiveTab] = useState('diary');
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(episodes));
+  }, [episodes]);
 
   const addEpisode = (episode: Omit<Episode, 'id'>) => {
     const newEpisode = {
